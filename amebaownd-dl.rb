@@ -2,6 +2,7 @@ require 'rubygems'
 require 'bundler'
 require 'digest/md5'
 require 'json'
+require 'yaml'
 Bundler.require
 
 SLEEP_SECOND = 3
@@ -74,4 +75,6 @@ article_urls.each do |url|
     image_path = "#{directory}/#{url.split('/').last}_#{i}_#{image_url.split('/').last}"
     fetch_or_read(agent: agent, url: image_url, filepath: image_path)
   end
+  yml_path = "#{directory}/#{url.split('/').last}.yml"
+  File.open(yml_path, 'w').write data.to_yaml
 end
