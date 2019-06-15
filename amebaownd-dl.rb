@@ -70,7 +70,9 @@ def sanitize(html)
     /[\s\t]*\n+[\s\t]*\n+[\s\t\n]*/,
     "\n\n"
   ).strip
-  paraed = text.split("\n\n").map{ |para| "<p>#{para}</p>" }.join("\n").gsub(/[\s\t\n]{2,}/, "\n")
+  paraed = text.split("\n\n").map{ |para| "<p>#{para}</p>" }.join("\n").gsub(
+    /[\s\t]*\n[\s\t\n]*/, "\n"
+  )
   doc = Nokogiri::HTML.parse(paraed)
   (elements + ['p']).each do |name|
     doc.search("//#{name}").each do |element|
