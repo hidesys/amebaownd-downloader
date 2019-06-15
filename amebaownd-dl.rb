@@ -70,7 +70,13 @@ def sanitize(html)
     /[\s\t]*\n+[\s\t]*\n+[\s\t\n]*/,
     "\n\n"
   ).strip
-  paraed = text.split("\n\n").map{ |para| "<p>#{para}</p>" }.join("\n").gsub(
+  paraed = text.split("\n\n").map do |para|
+    if text.split("\n\n").length > 1
+      "<p>#{para}</p>"
+    else
+      para
+    end
+  end.join("\n").gsub(
     /[\s\t]*\n[\s\t\n]*/, "\n"
   )
   doc = Nokogiri::HTML.parse(paraed)
@@ -101,7 +107,8 @@ article_urls.each do |url|
   doc = Nokogiri::HTML(body)
   data = {}
   XPATHES.each do |key, xpath|
-    data[key] = sanitize(doc.xpath(xpath).inner_html)
+    html = sanitize(doc.xpath(xpath).inner_html)
+    data[key] = [:datetime, :title].include?(key) ? html[3..-5] : html
   end
   image_urls = body.split("\"").select { |item| item =~ IMAGE_MATCH }.map { |url| JSON.parse("\"#{url}\"") }.uniq
   image_count = doc.xpath(IMAGE_COUNT_XPATH).length
