@@ -7,7 +7,8 @@ Bundler.require
 
 SLEEP_SECOND = 3
 XPATHES = {
-  title: "//h1[contains(@class,'blog-title__text')]/text()",
+  datetime: "//time[contains(@class,'blog-article__date')]",
+  title: "//h1[contains(@class,'blog-title__text')]",
   content: "//div[contains(@class,'blog-article__body')]"
 }
 IMAGE_MATCH = /^https\:\\u002F\\u002Fcdn.amebaowndme.com[\:\w\-\\\.]+jpg/
@@ -39,9 +40,13 @@ def fetch_or_read(agent:, url:, filepath:)
   else
     sleep SLEEP_SECOND
     puts "Downloading... : #{url}"
-    page = agent.get(url)
-    content = page.body.to_s
-    File.open(filepath, 'w').write(content)
+    begin
+      page = agent.get(url)
+      content = page.body.to_s
+      File.open(filepath, 'w').write(content)
+    rescue => ex
+      puts ex
+    end
   end
   content
 end
