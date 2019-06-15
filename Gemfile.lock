@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     connection_pool (2.2.2)
+    crass (1.0.4)
     domain_name (0.5.20180417)
       unf (>= 0.0.5, < 1.0.0)
     http-cookie (1.0.3)
@@ -24,7 +25,13 @@ GEM
       connection_pool (~> 2.2)
     nokogiri (1.8.5)
       mini_portile2 (~> 2.3.0)
+    nokogumbo (2.0.1)
+      nokogiri (~> 1.8, >= 1.8.4)
     ntlm-http (0.1.1)
+    sanitize (5.0.0)
+      crass (~> 1.0.2)
+      nokogiri (>= 1.8.0)
+      nokogumbo (~> 2.0)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.5)
@@ -35,6 +42,7 @@ PLATFORMS
 
 DEPENDENCIES
   mechanize
+  sanitize
 
 BUNDLED WITH
-   1.16.1
+   1.17.2

@@ -3,6 +3,7 @@ require 'bundler'
 require 'digest/md5'
 require 'json'
 require 'yaml'
+require 'sanitize'
 Bundler.require
 
 SLEEP_SECOND = 3
@@ -51,6 +52,14 @@ def fetch_or_read(agent:, url:, filepath:)
   content
 end
 
+def sanitize(html)
+  Sanitize.fragment(
+    html,
+    elements: %w(a h1 h2 h3 b font),
+    attributes: { 'a' => ['href', 'target'] }
+  ).gsub('&nbsp;', '').gsub(/[\s\n\t]{2,}/, "\n").strip
+end
+
 # Create directories
 logs = [directory, 'logs'].join('/')
 FileUtils.mkdir_p(logs)
@@ -63,7 +72,6 @@ sitemap = fetch_or_read(
   url: "https://#{site}/sitemap.xml",
   filepath: [logs, 'sitemap.xml'].join('/')
 )
-
 article_urls = Nokogiri::XML.parse(sitemap).xpath('//text()').map(&:to_s).select { |text| text =~ /^http.+\/posts\/\d+/ }
 article_urls.each do |url|
   filepath = "#{directory}/#{url.split('/').last}.html"
@@ -71,7 +79,7 @@ article_urls.each do |url|
   doc = Nokogiri::HTML(body)
   data = {}
   XPATHES.each do |key, xpath|
-    data[key] = doc.xpath(xpath).inner_html
+    data[key] = sanitize(doc.xpath(xpath).inner_html)
   end
   image_urls = body.split("\"").select { |item| item =~ IMAGE_MATCH }.map { |url| JSON.parse("\"#{url}\"") }.uniq
   image_count = doc.xpath(IMAGE_COUNT_XPATH).length
