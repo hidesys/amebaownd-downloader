@@ -53,11 +53,31 @@ def fetch_or_read(agent:, url:, filepath:)
 end
 
 def sanitize(html)
-  Sanitize.fragment(
+  elements = %w(a h1 h2 h3 b font span u)
+  text = Sanitize.fragment(
     html,
-    elements: %w(a h1 h2 h3 b font),
-    attributes: { 'a' => ['href', 'target'] }
-  ).gsub('&nbsp;', '').gsub(/[\s\n\t]{2,}/, "\n").strip
+    elements: elements,
+    attributes: {
+      'a' => ['href', 'target', 'style'],
+      'font' => ['style'],
+      'span' => ['style'],
+      'h1' => ['style'],
+      'h2' => ['style'],
+      'h3' => ['style'],
+      'u' => ['style']
+    }
+  ).gsub('&nbsp;', '').gsub(
+    /[\s\t]*\n+[\s\t]*\n+[\s\t\n]*/,
+    "\n\n"
+  ).strip
+  paraed = text.split("\n\n").map{ |para| "<p>#{para}</p>" }.join("\n").gsub(/[\s\t\n]{2,}/, "\n")
+  doc = Nokogiri::HTML.parse(paraed)
+  (elements + ['p']).each do |name|
+    doc.search("//#{name}").each do |element|
+      element.remove if !element.inner_html || element.inner_html =~ /^[\s\t\n]*$/
+    end
+  end
+  doc.at('body').inner_html.strip
 end
 
 # Create directories
